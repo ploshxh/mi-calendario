@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario como Google Calendar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.print.min.css" media="print" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/locale-all.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <style>
+        .calendar-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .add-event-container, .delete-event-container {
+            margin-bottom: 20px;
+        }
+
+        .delete-btn {
+            cursor: pointer;
+            color: #dc3545;
+            margin-left: 5px;
+        }
+
+        /* Estilo para los eventos */
+        .fc-event {
+            padding: 5px 10px;
+            background-color: #007bff; /* Azul */
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center add-event-container">
+            <div>
+                <h1>Mi Calendario</h1>
+            </div>
+            <button id="btn-add-event" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Evento</button>
+        </div>
+        <div id="event-form">
+            <div class="form-group">
+                <label for="event-title">Título del Evento</label>
+                <input type="text" id="event-title" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="event-start">Fecha de Inicio</label>
+                <input type="datetime-local" id="event-start" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="event-end">Fecha de Fin</label>
+                <input type="datetime-local" id="event-end" class="form-control">
+            </div>
+            <button type="button" id="btn-save-event" class="btn btn-primary">Guardar Evento</button>
+        </div>
+    </div>
+    <div id="calendar" class="calendar-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var calendar = $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                },
+                events: [],
+                selectable: true,
+                select: function(start, end, jsEvent, view) {
+                    $('#event-modal').modal('show');
+                    $('#event-title').val('');
+                    $('#event-start').val(moment(start).format('YYYY-MM-DDTHH:mm'));
+                    $('#event-end').val(moment(end).format('YYYY-MM-DDTHH:mm'));
+                },
+                eventClick: function(event) {
+                    $('#event-modal').modal('show');
+                    $('#event-title').val(event.title);
+                    $('#event-start').val(event.start.format('YYYY-MM-DDTHH:mm'));
+                    $('#event-end').val(event.end.format('YYYY-MM-DDTHH:mm'));
+                },
+                // Establecer el idioma en español
+                locale: 'es',
+                editable: true,
+                eventRender: function(event, element) {
+                    element.append('<i class="fas fa-trash-alt delete-btn" data-event-id="' + event._id + '"></i>');
+                }
+            });
+
+            $('#btn-add-event').click(function() {
+                $('#event-form').show();
+                $('#event-title').val('');
+                var start = calendar.fullCalendar('getDate');
+                $('#event-start').val(moment(start).format('YYYY-MM-DDTHH:mm'));
+                $('#event-end').val(moment(start).add(1, 'hour').format('YYYY-MM-DDTHH:mm'));
+            });
+
+            $('#btn-save-event').click(function() {
+                var title = $('#event-title').val();
+                var start = $('#event-start').val();
+                var end = $('#event-end').val();
+
+                if (title && start && end) {
+                    calendar.fullCalendar('renderEvent', {
+                        title: title,
+                        start: start,
+                        end: end,
+                        allDay: false,
+                        backgroundColor: '#4cb5f5', // Cian
+                        borderColor: '#4cb5f5' // Borde Cian
+                    }, true);
+                    $('#event-form').hide();
+                }
+            });
+
+            $('#calendar').on('click', '.delete-btn', function() {
+                var eventId = $(this).data('event-id');
+                calendar.fullCalendar('removeEvents', eventId);
+            });
+        });
+    </script>
+</body>
+</html>
+
+
